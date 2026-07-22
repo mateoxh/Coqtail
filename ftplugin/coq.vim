@@ -19,11 +19,13 @@ if g:coqtail_supported
   call coqtail#register()
 endif
 
+" Set 'path" to Rocq's library location
+let &l:path = coqtail#util#getpath()
+let b:undo_ftplugin .= ' | setl pa<'
+
 " Follow imports
-if g:coqtail_supported
-  setlocal includeexpr=coqtail#findlib(v:fname)
-  let b:undo_ftplugin .= ' | setl inex<'
-endif
+setlocal includeexpr=coqtail#includeexpr()
+let b:undo_ftplugin .= ' | setl inex<'
 
 " Comments
 if has('comments')

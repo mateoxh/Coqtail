@@ -191,3 +191,21 @@ function! coqtail#util#pushtagstack(item) abort
     call settagstack(l:winid, l:tagstack, l:action)
   endif
 endfunction
+
+" Get the path to Rocq's libraries
+function! coqtail#util#getpath() abort
+  let l:paths = map(systemlist('coqidetop -where'), 'trim(v:val)')
+  let l:path = '.'
+
+  if !v:shell_error && !empty(l:paths)
+    let l:prefix = l:paths[0]
+    let l:libs = [
+          \ l:prefix . '/theories/**',
+          \ l:prefix . '/user-contrib/**'
+          \ ]
+    let l:path .= ',' . join(l:libs, ',')
+  endif
+
+  let l:path .= ',,'
+  return l:path
+endfunction
