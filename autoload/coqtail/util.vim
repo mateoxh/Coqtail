@@ -192,9 +192,18 @@ function! coqtail#util#pushtagstack(item) abort
   endif
 endfunction
 
+" For older Vim versions that don't have trim()
+function! s:trim(x) abort
+  if has('patch-8.0.1630')
+    return trim(a:x)
+  else
+    return substitute(a:x, '^\s*\(.\{-}\)\s*$', '\1', '')
+  endif
+endfunction
+
 " Get the path to Rocq's libraries
 function! coqtail#util#getpath() abort
-  let l:paths = map(systemlist('coqidetop -where'), 'trim(v:val)')
+  let l:paths = map(systemlist('coqidetop -where'), 's:trim(v:val)')
   let l:path = '.'
 
   if !v:shell_error && !empty(l:paths)
