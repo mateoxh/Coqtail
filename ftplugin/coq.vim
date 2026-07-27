@@ -3,7 +3,6 @@ if exists('b:did_ftplugin')
   finish
 endif
 let b:did_ftplugin = 1
-let b:undo_ftplugin = ''
 
 if g:coqtail_supported
   " Initialize buffer local variables, commands, and mappings.
@@ -11,17 +10,20 @@ if g:coqtail_supported
 
   " Set 'path" to Rocq's library location
   let &l:path = coqtail#util#getpath()
-  let b:undo_ftplugin .= ' | setl pa<'
 else
   call coqtail#util#warn(
         \ "Coqtail requires Python 3.6 or later.\n" .
         \ 'See https://github.com/whonore/Coqtail/blob/main/README.md#python-2-support.'
         \)
+
+  setlocal path-=/usr/include
 endif
+
+let b:undo_ftplugin = 'setl pa<'
 
 setlocal suffixesadd=.v
 setlocal include=\\<Require\\>\\(\\_s*\\(Import\\\|Export\\)\\>\\)\\?
-let b:undo_ftplugin .= 'setl sua< inc<'
+let b:undo_ftplugin .= ' | setl sua< inc<'
 
 " Follow imports
 setlocal includeexpr=coqtail#includeexpr()
