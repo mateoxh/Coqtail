@@ -208,7 +208,7 @@ function! coqtail#util#rocq_name() abort
     let l:coq_prog = coqtail#util#getvar([b:, g:], 'coqtail_coq_prog', '')
 
     py3 import xmlInterface
-    return py3eval($"xmlInterface.find_coq('{l:coq_path}' or None, '{l:coq_prog}' or None)")
+    return py3eval(printf('xmlInterface.find_coq("%s" or None, "%s" or None)', l:coq_path, l:coq_prog))
   catch
     return ''
   endtry
