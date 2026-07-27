@@ -204,11 +204,11 @@ endfunction
 " Get Rocq executable name
 function! coqtail#util#rocq_name() abort
   try
+    let l:coq_path = expand(coqtail#util#getvar([b:, g:], 'coqtail_coq_path', $COQBIN))
+    let l:coq_prog = coqtail#util#getvar([b:, g:], 'coqtail_coq_prog', '')
+
     py3 import xmlInterface
-    return py3eval('xmlInterface.find_coq(coq_path or None, coq_prog or None)', {
-          \ 'coq_path': expand(coqtail#util#getvar([b:, g:], 'coqtail_coq_path', $COQBIN)),
-          \ 'coq_prog': coqtail#util#getvar([b:, g:], 'coqtail_coq_prog', '')
-          \ })
+    return py3eval(printf('xmlInterface.find_coq("%s" or None, "%s" or None)', l:coq_path, l:coq_prog))
   catch
     return ''
   endtry
