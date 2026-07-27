@@ -201,18 +201,35 @@ function! s:trim(x) abort
   endif
 endfunction
 
+" Get Rocq executable name
+function! coqtail#util#rocq_name() abort
+  try
+    py3 import xmlInterface
+    return py3eval('xmlInterface.find_coq(coq_path or None, coq_prog or None)', {
+          \ 'coq_path': expand(coqtail#util#getvar([b:, g:], 'coqtail_coq_path', $COQBIN)),
+          \ 'coq_prog': coqtail#util#getvar([b:, g:], 'coqtail_coq_prog', '')
+          \ })
+  catch
+    return ''
+  endtry
+endfunction
+
 " Get the path to Rocq's libraries
 function! coqtail#util#getpath() abort
-  let l:paths = map(systemlist('coqidetop -where'), 's:trim(v:val)')
   let l:path = '.'
+  let l:rocq = coqtail#util#rocq_name()
 
-  if !v:shell_error && !empty(l:paths)
-    let l:prefix = l:paths[0]
-    let l:libs = [
-          \ l:prefix . '/theories/**',
-          \ l:prefix . '/user-contrib/**'
-          \ ]
-    let l:path .= ',' . join(l:libs, ',')
+  if !empty(l:rocq)
+    let l:paths = map(systemlist($"{l:rocq} -where"), 's:trim(v:val)')
+
+    if !v:shell_error && !empty(l:paths)
+      let l:prefix = l:paths[0]
+      let l:libs = [
+            \ l:prefix . '/theories/**',
+            \ l:prefix . '/user-contrib/**'
+            \ ]
+      let l:path .= ',' . join(l:libs, ',')
+    endif
   endif
 
   let l:path .= ',,'
