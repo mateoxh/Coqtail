@@ -192,15 +192,6 @@ function! coqtail#util#pushtagstack(item) abort
   endif
 endfunction
 
-" For older Vim versions that don't have trim()
-function! s:trim(x) abort
-  if has('patch-8.0.1630')
-    return trim(a:x)
-  else
-    return substitute(a:x, '^\s*\(.\{-}\)\s*$', '\1', '')
-  endif
-endfunction
-
 " Get Rocq executable name
 function! coqtail#util#rocq_name() abort
   try
@@ -220,13 +211,13 @@ function! coqtail#util#getpath() abort
   let l:rocq = coqtail#util#rocq_name()
 
   if !empty(l:rocq)
-    let l:paths = map(systemlist($"{l:rocq} -where"), 's:trim(v:val)')
+    let l:cmd = l:rocq . ' -where'
+    let l:dir = substitute(system(l:cmd), '\v\s|\n', '', 'g')
 
-    if !v:shell_error && !empty(l:paths)
-      let l:prefix = l:paths[0]
+    if !v:shell_error && !empty(l:dir)
       let l:libs = [
-            \ l:prefix . '/theories/**',
-            \ l:prefix . '/user-contrib/**'
+            \ l:dir . '/theories/**',
+            \ l:dir . '/user-contrib/**'
             \ ]
       let l:path .= ',' . join(l:libs, ',')
     endif
