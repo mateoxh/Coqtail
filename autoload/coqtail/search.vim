@@ -51,11 +51,15 @@ function! coqtail#search#select_i() abort
   let [start, end] = s:find_proof_block()
   let start_max_col = match(getline(start[1]), '^[^.]\+\.\zs', start[2]) + 1
 
-  if start[1] != end[1] && start[2] == 1 && end[2] == 1 && start_max_col == col([start[1], '$'])
+  " For indented proof blocks find the first non-whitespace character
+  let start_first_col = match(getline(start[1]), '\S') + 1
+  let end_first_col = match(getline(end[1]), '\S') + 1
+
+  if start[1] != end[1] && start[2] == start_first_col && end[2] == end_first_col && start_max_col == col([start[1], '$'])
     let start[1] += 1
-    let start[2]  = 0
+    let start[2]  = start_first_col
     let end[1]   -= 1
-    let end[2]    = 0
+    let end[2]    = end_first_col
 
     call setpos('.', start)
     normal! V
@@ -63,12 +67,12 @@ function! coqtail#search#select_i() abort
   else
     if start_max_col == col([start[1], '$'])
       let start[1] += 1
-      let start[2]  = 0
+      let start[2]  = start_first_col
     else
       let start[2] = start_max_col
     endif
 
-    if end[2] == 1
+    if end[2] == end_first_col
       let end[1] -= 1
       let end[2]  = col([end[1], '$'])
     else
@@ -85,8 +89,12 @@ function! coqtail#search#select_a() abort
   let [start, end] = s:find_proof_block()
   let end_max_col = match(getline(end[1]), '^[^.]\+\.\zs', end[2]) + 1
 
+  " For indented proof blocks find the first non-whitespace character
+  let start_first_col = match(getline(start[1]), '\S') + 1
+  let end_first_col = match(getline(end[1]), '\S') + 1
+
   call setpos('.', start)
-  if start[2] > 1 || end[2] > 1 || end_max_col != col([end[1], '$'])
+  if start[2] > start_first_col || end[2] > end_first_col || end_max_col != col([end[1], '$'])
     let end[2] = end_max_col
     normal! v
   else
