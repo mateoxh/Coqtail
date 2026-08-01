@@ -191,3 +191,38 @@ function! coqtail#util#pushtagstack(item) abort
     call settagstack(l:winid, l:tagstack, l:action)
   endif
 endfunction
+
+" Get Rocq executable name
+function! coqtail#util#rocq_name() abort
+  try
+    let l:coq_path = expand(coqtail#util#getvar([b:, g:], 'coqtail_coq_path', $COQBIN))
+    let l:coq_prog = coqtail#util#getvar([b:, g:], 'coqtail_coq_prog', '')
+
+    py3 import xmlInterface
+    return py3eval(printf('xmlInterface.find_coq("%s" or None, "%s" or None)', l:coq_path, l:coq_prog))
+  catch
+    return ''
+  endtry
+endfunction
+
+" Get the path to Rocq's libraries
+function! coqtail#util#getpath() abort
+  let l:path = '.'
+  let l:rocq = coqtail#util#rocq_name()
+
+  if !empty(l:rocq)
+    let l:cmd = l:rocq . ' -where'
+    let l:dir = substitute(system(l:cmd), '\v\s|\n', '', 'g')
+
+    if !v:shell_error && !empty(l:dir)
+      let l:libs = [
+            \ l:dir . '/theories/**',
+            \ l:dir . '/user-contrib/**'
+            \ ]
+      let l:path .= ',' . join(l:libs, ',')
+    endif
+  endif
+
+  let l:path .= ',,'
+  return l:path
+endfunction
