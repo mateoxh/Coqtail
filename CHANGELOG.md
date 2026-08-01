@@ -2,6 +2,8 @@
 
 ## Unreleased ([main])
 
+## [1.10.0]
+
 ### Added
 - Support for Rocq 9.2.
   (PR #423)
@@ -9,6 +11,12 @@
   (PR #422)
 - Set `wildignore` for Rocq compilation artifacts (`.vo`, `.glob`, etc).
   (PR #421)
+
+### Fixed
+- Recognize `Abbreviation` keyword.
+  (PR #430)
+- Parse comments in _CoqProject correctly if they don't have whitespace before #.
+  (PR #428)
 
 ## [1.9.0]
 
@@ -493,6 +501,7 @@
 
 [main]: https://github.com/whonore/Coqtail
 [python2]: https://github.com/whonore/Coqtail/tree/python2
+[1.10.0]: https://github.com/whonore/Coqtail/tree/v1.10.0
 [1.9.0]: https://github.com/whonore/Coqtail/tree/v1.9.0
 [1.8.0]: https://github.com/whonore/Coqtail/tree/v1.8.0
 [1.7.2]: https://github.com/whonore/Coqtail/tree/v1.7.2

@@ -12,10 +12,18 @@ let s:unsupported_msg =
 " Server port.
 let s:port = -1
 
-" Find the path corresponding to 'lib'. Used by includeexpr.
-function! coqtail#findlib(lib) abort
-  let [l:ok, l:lib] = s:call('find_lib', 'sync', 0, {'lib': a:lib})
-  return (l:ok && l:lib != v:null) ? l:lib : a:lib
+" Find an included library.
+" WARNING: For performance reasons this function uses 'v:fname' and it only
+" works when evaluating 'includeexpr'.
+function! coqtail#includeexpr() abort
+  " First, try asking Rocq
+  let [l:ok, l:lib] = s:call('find_lib', 'sync', 0, {'lib': v:fname})
+  if l:ok && l:lib != v:null
+    return l:lib
+  endif
+  " otherwise, fallback to searching the filename in &path.
+  let l:lib = tr(v:fname, '.', '/')
+  return substitute(l:lib, '\v\C^(Corelib|Coq)/', '', '')
 endfunction
 
 " Find the start of the nth goal.
