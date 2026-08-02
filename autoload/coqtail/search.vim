@@ -32,8 +32,10 @@ function! s:search_count(pattern, flags, count, visual) abort
   endfor
 endfunction
 
-function! s:find_proof_block() abort
+function! s:find_range() abort
   let block = searchpairpos(s:proofstart_pattern, '', s:proofend_pattern, 'cW')
+  let origpos = getpos('.')
+
   if block == [0, 0]
     call search(s:proofstart_pattern, 'cW')
     let start = getpos('.')
@@ -44,53 +46,80 @@ function! s:find_proof_block() abort
     call search(s:proofstart_pattern, 'bW')
     let start = getpos('.')
   endif
+
+  call setpos('.', origpos)
   return [start, end]
 endfunction
 
-function! coqtail#search#select_i() abort
-  let [start, end] = s:find_proof_block()
+function! s:select_i() abort
+  let [start, end] = s:find_range()
   let start_max_col = match(getline(start[1]), '^[^.]\+\.\zs', start[2]) + 1
 
-  if start[1] != end[1] && start[2] == 1 && end[2] == 1 && start_max_col == col([start[1], '$'])
-    let start[1] += 1
-    let start[2]  = 0
-    let end[1]   -= 1
-    let end[2]    = 0
+  " For indented proof blocks find the first non-whitespace character
+  let start_first_col = match(getline(start[1]), '\S') + 1
+  let end_first_col = match(getline(end[1]), '\S') + 1
 
-    call setpos('.', start)
-    normal! V
-    call setpos('.', end)
+  if end[1] - start[1] > 1
+        \ && end[2] == end_first_col
+        \ && start_max_col == col([start[1], '$'])
+    let start[1] += 1
+    let start[2]  = start_first_col
+    let end[1]   -= 1
+    let end[2]    = end_first_col
+
+    return ['V', start, end]
   else
     if start_max_col == col([start[1], '$'])
       let start[1] += 1
-      let start[2]  = 0
+      let start[2]  = start_first_col
     else
       let start[2] = start_max_col
     endif
 
-    if end[2] == 1
+    if end[2] == end_first_col
       let end[1] -= 1
       let end[2]  = col([end[1], '$'])
     else
       let end[2] -= 1
     endif
 
+    if start[1] > end[1] || (start[1] == end[1] && start[2] >= end[2])
+      return 0
+    endif
+
+    return ['v', start, end]
+  endif
+endfunction
+
+function! s:select_a() abort
+  let [start, end] = s:find_range()
+  let end_max_col = match(getline(end[1]), '^[^.]\+\.\zs', end[2]) + 1
+
+  " For indented proof blocks find the first non-whitespace character
+  let start_first_col = match(getline(start[1]), '\S') + 1
+  let end_first_col = match(getline(end[1]), '\S') + 1
+
+  if start[2] > start_first_col || end[2] > end_first_col || end_max_col != col([end[1], '$'])
+    let end[2] = end_max_col
+    return ['v', start, end]
+  else
+    return ['V', start, end]
+  endif
+endfunction
+
+function! s:select_wrapper(args) abort
+  if type(a:args) == type([]) && len(a:args) == 3
+    let [visual, start, end] = a:args
     call setpos('.', start)
-    normal! v
+    exe 'normal! ' . visual
     call setpos('.', end)
   endif
 endfunction
 
-function! coqtail#search#select_a() abort
-  let [start, end] = s:find_proof_block()
-  let end_max_col = match(getline(end[1]), '^[^.]\+\.\zs', end[2]) + 1
+function! coqtail#search#select_i() abort
+  return s:select_wrapper(s:select_i())
+endfunction
 
-  call setpos('.', start)
-  if start[2] > 1 || end[2] > 1 || end_max_col != col([end[1], '$'])
-    let end[2] = end_max_col
-    normal! v
-  else
-    normal! V
-  endif
-  call setpos('.', end)
+function! coqtail#search#select_a() abort
+  return s:select_wrapper(s:select_a())
 endfunction

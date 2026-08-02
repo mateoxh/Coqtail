@@ -1,0 +1,120 @@
+" Tests for the proof text object
+
+Given coq (own-line-i):
+  Goal True.
+  Proof.
+    auto.
+    auto.
+    auto. auto. auto.
+    auto.
+  Qed.
+
+Do (own-line-i):
+  diP
+
+Expect coq (own-line-i):
+  Goal True.
+  Proof.
+  Qed.
+
+Given coq (own-line-a):
+  Goal True.
+  Proof.
+    auto.
+  Qed.
+
+Do (own-line-a):
+  daP
+
+Expect coq (own-line-a):
+  Goal True.
+
+Given coq (mixed-change-i):
+  Goal True. Proof.
+    auto.
+  Qed.
+
+Do (mixed-change-i):
+  ciP
+
+Expect coq (mixed-change-i):
+  Goal True. Proof.
+
+  Qed.
+
+Given coq (mixed-a):
+  Goal True. Proof.
+    auto.
+  Qed.
+
+Do (mixed-a):
+  daP
+
+Expect coq (mixed-a):
+  Goal True. 
+
+Given coq (inline-c-i):
+  Goal True. Proof. auto. Qed.
+
+Do (inline-c-i):
+  ciP
+
+Expect coq (inline-c-i):
+  Goal True. Proof.Qed.
+
+Given coq (inline-c-a):
+  Goal True. Proof. auto. Qed.
+
+Do (inline-c-a):
+  caP
+
+Expect coq (inline-c-a):
+  Goal True. 
+
+Given coq (inline2-c-a):
+  Goal True.
+  Proof.
+  auto. Qed.
+
+Do (inline2-c-a):
+  ciP
+
+Expect coq (inline2-c-a):
+  Goal True.
+  Proof.
+  Qed.
+
+Given coq (inline-after-proof):
+  Goal True.
+  Proof. auto.
+  Qed.
+
+Do (inline-after-proof):
+  ciP
+
+Expect coq (inline-after-proof):
+  Goal True.
+  Proof.Qed.
+
+Given coq (inline-mixed):
+  Goal True. Proof. auto.
+  auto. Qed.
+
+Do (inline-mixed):
+  ciP
+
+Expect coq (inline-mixed):
+  Goal True. Proof.Qed.
+
+Given coq (empty):
+  Goal True.
+  Proof.
+  Qed.
+
+Do (empty):
+  diP
+
+Expect coq (empty):
+  Goal True.
+  Proof.
+  Qed.
