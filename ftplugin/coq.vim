@@ -149,9 +149,11 @@ function! s:CoqtailHighlight() abort
       let l:sent.guibg    = '#5F5F87'
 
       if l:t_Co >= 256
+        " Dark 256-color terminal
         let l:checked.ctermbg = '18'
         let l:sent.ctermbg    = '60'
       else
+        " Dark 16-color terminal
         let l:checked.ctermbg = '4'
         let l:sent.ctermbg    = '6'
       endif
@@ -161,9 +163,11 @@ function! s:CoqtailHighlight() abort
       let l:sent.guibg    = '#32CD32'
 
       if l:t_Co >= 256
+        " Light 256-color terminal
         let l:checked.ctermbg = '120'
         let l:sent.ctermbg    = '40'
       else
+        " Light 16-color terminal
         let l:checked.ctermbg = '10'
         let l:sent.ctermbg    = '2'
       endif
