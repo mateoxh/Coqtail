@@ -135,21 +135,44 @@ augroup END
 function! s:CoqtailHighlight() abort
   if exists('*g:CoqtailHighlight')
     " Use user-defined colors if they exist.
-    " NOTE: This is only for backwards compatability. Use
-    " `autocmd ColorScheme` instead.
+    " NOTE: This is only for backwards compatability. Use the ColorScheme
+    " autocommand instead.
     call g:CoqtailHighlight()
-  elseif &t_Co > 16
-    if &background ==# 'dark'
-      hi def CoqtailChecked ctermbg=17 guibg=#113311
-      hi def CoqtailSent    ctermbg=60 guibg=#007630
-    else
-      hi def CoqtailChecked ctermbg=157 guibg=LightGreen
-      hi def CoqtailSent    ctermbg=40  guibg=LimeGreen
-    endif
   else
-    hi def CoqtailChecked ctermbg=4 guibg=LightGreen
-    hi def CoqtailSent    ctermbg=7 guibg=LimeGreen
+    let l:t_Co = exists('&t_Co') && !empty(&t_Co) && &t_Co > 1 ? &t_Co : 1
+    let l:checked = {}
+    let l:sent = {}
+
+    if &background ==# 'dark'
+      " Dark GUI colors
+      let l:checked.guibg = '#000087'
+      let l:sent.guibg    = '#5F5F87'
+
+      if l:t_Co >= 256
+        let l:checked.ctermbg = '18'
+        let l:sent.ctermbg    = '60'
+      else
+        let l:checked.ctermbg = '4'
+        let l:sent.ctermbg    = '6'
+      endif
+    else
+      " Light GUI colors
+      let l:checked.guibg = '#90EE90'
+      let l:sent.guibg    = '#32CD32'
+
+      if l:t_Co >= 256
+        let l:checked.ctermbg = '120'
+        let l:sent.ctermbg    = '40'
+      else
+        let l:checked.ctermbg = '10'
+        let l:sent.ctermbg    = '2'
+      endif
+    endif
   endif
+
+  exe printf("hi def CoqtailChecked ctermbg=%s guibg=%s", l:checked.ctermbg, l:checked.guibg)
+  exe printf("hi def CoqtailSent    ctermbg=%s guibg=%s", l:sent.ctermbg   , l:sent.guibg)
+
   hi def link CoqtailDiffAdded     DiffText
   hi def link CoqtailDiffAddedBg   DiffChange
   hi def link CoqtailDiffRemoved   DiffDelete
@@ -158,10 +181,11 @@ function! s:CoqtailHighlight() abort
   hi def link CoqtailOmitted       coqProofAdmit
 endfunction
 
+" Apply colors at least once here
 call s:CoqtailHighlight()
 
-" Apply highlighting when the colorscheme changes
 augroup CoqtailHighlight
   autocmd!
-  autocmd ColorScheme * call s:CoqtailHighlight()
+  " Reapply highlighting when the colorscheme changes
+  autocmd ColorScheme * call <Sid>CoqtailHighlight()
 augroup END
