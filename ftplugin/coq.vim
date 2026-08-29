@@ -130,3 +130,38 @@ augroup CoqtailJoinspaces
         \ let &joinspaces = get(b:, '_coqtail_save_js', 1)
         \ | unlet! b:_coqtail_save_js
 augroup END
+
+" Define Coqtail-specific highlighting groups.
+function! s:CoqtailHighlight() abort
+  if exists('*g:CoqtailHighlight')
+    " Use user-defined colors if they exist.
+    " NOTE: This is only for backwards compatability. Use
+    " `autocmd ColorScheme` instead.
+    call g:CoqtailHighlight()
+  elseif &t_Co > 16
+    if &background ==# 'dark'
+      hi def CoqtailChecked ctermbg=17 guibg=#113311
+      hi def CoqtailSent    ctermbg=60 guibg=#007630
+    else
+      hi def CoqtailChecked ctermbg=157 guibg=LightGreen
+      hi def CoqtailSent    ctermbg=40  guibg=LimeGreen
+    endif
+  else
+    hi def CoqtailChecked ctermbg=4 guibg=LightGreen
+    hi def CoqtailSent    ctermbg=7 guibg=LimeGreen
+  endif
+  hi def link CoqtailDiffAdded     DiffText
+  hi def link CoqtailDiffAddedBg   DiffChange
+  hi def link CoqtailDiffRemoved   DiffDelete
+  hi def link CoqtailDiffRemovedBg DiffDelete
+  hi def link CoqtailError         Error
+  hi def link CoqtailOmitted       coqProofAdmit
+endfunction
+
+call s:CoqtailHighlight()
+
+" Apply highlighting when the colorscheme changes
+augroup CoqtailHighlight
+  autocmd!
+  autocmd ColorScheme * call s:CoqtailHighlight()
+augroup END
